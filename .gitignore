@@ -1,0 +1,77 @@
+/target/
+**/target/
+
+# Local proof packs are release inputs, not source-controlled authority.
+/artifacts/*
+!/artifacts/RETRO_BOOMER_V1_STATUS.md
+/history-step-pack*/
+/retro-boomer-history-step-pack*/
+/history-step-pack*.tar.gz
+/retro-boomer-history-step-pack*.tar.gz
+/retro-boomer-v1*.tar.gz
+
+# Local packaging, build staging and caches.
+/dist/
+/build/
+/out/
+/release/
+/releases/
+/.release-ci/
+/release-assets/
+/retro-boomer-core-*.tar.gz
+/retro-boomer-core-*.zip
+/retro-boomer-gui-*.deb
+/retro-boomer-gui-*-setup.exe
+/retro-boomer-gui-*.dmg
+/logs/
+/tmp/
+/temp/
+/.cache/
+/.pytest_cache/
+
+# User data must never be included in the source repository.
+**/.retro-boomer/
+**/.parano1d/
+/data/
+/node-data/
+/chain-data/
+/wallet-data/
+/wallets/
+**/wallet.key
+**/mining.key
+**/p2p_identity.key
+**/.mining-key-*.tmp
+**/mdbx.dat
+**/mdbx.lck
+/retro-boomerd.toml
+/retro-boomer-gui.toml
+/gui-settings.json
+*.log
+*.log.*
+
+# Private machine configuration and credentials. Do not ignore all *.key or
+# *.pem files: public verification material and source fixtures must remain.
+/.aws/
+/.agents/
+.env
+.env.*
+!.env.example
+!.env.sample
+**/id_rsa
+**/id_ed25519
+
+# Editor and language caches.
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Retro Boomer local state and generated distribution products.
+**/RetroBoomer/
+
+# Windows download-origin metadata is machine-local, not source content.
+*:Zone.Identifier

@@ -1,0 +1,29 @@
+{
+  "archive_name": "retro-boomer-history-step-pack-v1.0.0.tar.gz",
+  "archive_root": "retro-boomer-history-step-pack-v1.0.0",
+  "archive_sha256": "4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e",
+  "bank": "841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58",
+  "extraction_root": "retro-boomer-history-step-pack-v1.0.0",
+  "files": {
+    "pins.env": "c148463d990a13d6c60aa5010db8521d90db963f1cf584745730d5a4430cfbfd",
+    "v21-large.field-r1cs.zst": "279f9a1b2f369cf2c3b6f3b85d3c72938800f8c6a0ad6eaa27440a8c87687380",
+    "v21-native.field-r1cs.zst": "f6cff636fc1e458afe3c65040d5839d2b25aa8df675a88bcb424177f57edbfcc",
+    "v21-runtime-metadata.bin": "ad9cf64c8f24d93247e22842164066d26a2fc1d9bf03016c009a5c89ca874b2b",
+    "v21-small.field-r1cs.zst": "727cd49cfdbab8e1a67f229d77c3826f872a575b5ad29e9e82e1af47e88150bb",
+    "verified-block1-0.terminal": "41b15583187421dde4ea6b14b446cf37432d30166d38a8fd31971ead77c52f56",
+    "verified-block1-1.terminal": "61930a0be1b0702fecaf6b154b1f63e15eb39a54ad3a89715480576afe82e851",
+    "verified-block1-2.terminal": "33f77d7f15516beaa8947d561ae41bfd978d974235e18f75199b8a25a17c2e45"
+  },
+  "provenance": {
+    "generation_log_attestation": null,
+    "generation_source_commit": null,
+    "generator": "bench_prover/src/bin/retro_boomer_v1_pack.rs",
+    "packaging_checks": "Exact approved file hashes and framing only; no regeneration, semantic matrix scan or terminal verification.",
+    "reported_local_directory": "artifacts/retro-boomer-v1-20261031",
+    "required_build_checks": "Full semantic matrix authentication by noid_node/build.rs; no prechecked bypass.",
+    "schema": 1,
+    "status": "Native RETRO BOOMER materials were generated and verified locally according to the owner and approved in source. Packaging independently checks the eight approved file hashes and framing. Generation source commit and independently authenticated generation-log attestation are unavailable; five-platform qualification is pending."
+  },
+  "schema": 1,
+  "version": "1.0.0"
+}

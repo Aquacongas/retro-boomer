@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Retro Boomer
+Comment=Retro Boomer proof-native wallet
+Exec=/usr/lib/retro-boomer/retro-boomer-gui
+Icon=org.retroboomer.wallet
+Terminal=false
+Categories=Finance;Network;
+StartupNotify=true
+StartupWMClass=org.retroboomer.wallet

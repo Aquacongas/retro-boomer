@@ -1,0 +1,98 @@
+name: RETRO BOOMER Approved Draft Operations
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Create an unpublished final draft or publish an existing approved draft
+        required: true
+        type: choice
+        options:
+          - create-draft
+          - publish-draft
+      draft_release_id:
+        description: Exact final product draft ID, required only for publish-draft
+        required: false
+        type: string
+      candidate_run_id:
+        description: Successful RETRO BOOMER Release Candidate run ID
+        required: true
+        type: string
+      candidate_manifest_sha256:
+        description: Independently reviewed SHA-256 of candidate.json from that run
+        required: true
+        type: string
+      confirmation:
+        description: Type CREATE DRAFT RETRO BOOMER v1.0.0 or PUBLISH DRAFT RETRO BOOMER v1.0.0
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+env:
+  GH_HOST: github.com
+  PYTHONDONTWRITEBYTECODE: "1"
+  RELEASE_OPERATION: ${{ inputs.operation }}
+  DRAFT_RELEASE_ID: ${{ inputs.draft_release_id }}
+  CONFIRMATION: ${{ inputs.confirmation }}
+concurrency:
+  group: retro-boomer-publication-v1.0.0
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'Aquacongas/retro-boomer' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check successful candidate run and required approval policy
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+          CANDIDATE_SHA256: ${{ inputs.candidate_manifest_sha256 }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: python3 scripts/release/workflow_gate.py publication-inputs
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: retro-boomer-release-candidate
+          path: candidate
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.candidate_run_id }}
+      - name: Recheck reviewed bytes and existing source tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+          CANDIDATE_SHA256: ${{ inputs.candidate_manifest_sha256 }}
+        run: python3 scripts/release/workflow_gate.py verify-publication --directory candidate
+  publish:
+    needs: verify
+    environment: retro-boomer-release
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: retro-boomer-release-candidate
+          path: candidate
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.candidate_run_id }}
+      - name: Execute only the explicitly approved draft operation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+          CANDIDATE_SHA256: ${{ inputs.candidate_manifest_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/release/workflow_gate.py verify-publication --directory candidate
+          # Creation uses --draft --verify-tag; publishing updates only the reverified draft ID.
+          python3 scripts/release/workflow_gate.py draft-action --directory candidate

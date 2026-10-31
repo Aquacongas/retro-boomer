@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.retroboomer.wallet</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <name>Retro Boomer</name>
+  <summary>Private proof-native wallet</summary>
+  <description>
+    <p>
+      Retro Boomer is a native wallet for the TAPE network. It supervises its
+      bundled full node locally, so the wallet can be used without a terminal
+      or a separately managed daemon.
+    </p>
+  </description>
+  <launchable type="desktop-id">org.retroboomer.wallet.desktop</launchable>
+  <icon type="stock">org.retroboomer.wallet</icon>
+  <provides>
+    <binary>retro-boomer-gui</binary>
+  </provides>
+  <categories>
+    <category>Finance</category>
+    <category>Network</category>
+  </categories>
+  <url type="homepage">https://retroboomer.org</url>
+  <url type="bugtracker">https://github.com/Aquacongas/retro-boomer/issues</url>
+  <developer_name>Retro Boomer</developer_name>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="@VERSION@" date="@RELEASE_DATE@"/>
+  </releases>
+</component>

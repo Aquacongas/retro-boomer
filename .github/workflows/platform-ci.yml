@@ -1,0 +1,125 @@
+name: RETRO BOOMER Platform CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: retro-boomer-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+  CARGO_TERM_COLOR: always
+jobs:
+  release-tooling:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check release scripts without Cargo or proof generation
+        shell: bash
+        run: |
+          for file in scripts/build_release.sh scripts/release_common.sh scripts/publish_release.sh scripts/release/*.sh; do bash -n "$file"; done
+          python3 -m unittest discover -s scripts/tests -p 'test_release*.py' -v
+          python3 -m unittest discover -s scripts/tests -p 'test_dmg_size.py' -v
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: linux-x86_64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            flags: -C target-cpu=x86-64
+          - id: linux-aarch64
+            runner: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+            flags: ""
+          - id: windows-x86_64
+            runner: windows-2025
+            target: x86_64-pc-windows-msvc
+            flags: -C target-cpu=x86-64
+          - id: macos-x86_64
+            runner: macos-15-intel
+            target: x86_64-apple-darwin
+            flags: -C target-cpu=x86-64
+          - id: macos-aarch64
+            runner: macos-15
+            target: aarch64-apple-darwin
+            flags: ""
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    env:
+      RUSTFLAGS: ${{ matrix.flags }}
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install Linux native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y appstream clang libclang-dev cmake dpkg-dev pkg-config qemu-user
+      - name: Locate macOS libclang
+        if: runner.os == 'macOS'
+        run: |
+          libclang_path="$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib"
+          test -f "$libclang_path/libclang.dylib"
+          echo "LIBCLANG_PATH=$libclang_path" >> "$GITHUB_ENV"
+      - name: Locate Windows libclang
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $clang = Join-Path $env:ProgramFiles "LLVM\bin"
+          if (-not (Test-Path (Join-Path $clang "libclang.dll"))) { throw "libclang.dll not found" }
+          "LIBCLANG_PATH=$clang" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.96.0 --profile minimal
+      - name: Cache downloaded Cargo sources only
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: retro-boomer-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock') }}
+      - name: Fetch locked dependencies for the explicit target
+        run: cargo fetch --locked --target '${{ matrix.target }}'
+      - name: Compile only the four desktop/Core binaries
+        run: >-
+          cargo build --offline --locked --target '${{ matrix.target }}'
+          -p noid_node -p noid-extminer -p noid_gui
+          --bin retro-boomerd --bin retro-boomer-cli --bin retro-boomer-miner --bin retro-boomer-gui
+      - name: Check native binaries without starting a node
+        run: |
+          suffix=
+          if [[ '${{ runner.os }}' == Windows ]]; then suffix=.exe; fi
+          bin="target/${{ matrix.target }}/debug"
+          python scripts/release/release_products.py check-binaries --bin-dir "$bin" --platform '${{ matrix.id }}'
+          "$bin/retro-boomerd$suffix" --check-hardware
+          "$bin/retro-boomerd$suffix" --help >/dev/null
+          "$bin/retro-boomer-cli$suffix" --help >/dev/null
+          "$bin/retro-boomer-miner$suffix" --check-hardware
+          "$bin/retro-boomer-miner$suffix" --help >/dev/null
+          "$bin/retro-boomer-gui$suffix" --release-self-check
+      - name: Reject unsupported x86 CPU without SIGILL
+        if: matrix.id == 'linux-x86_64'
+        run: |
+          set +e
+          result=$(qemu-x86_64 -cpu qemu64 target/x86_64-unknown-linux-gnu/debug/retro-boomerd --check-hardware 2>&1)
+          status=$?
+          set -e
+          test "$status" -ne 0
+          test "$status" -ne 132
+          grep -q 'CPU UNSUPPORTED' <<< "$result"

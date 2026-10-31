@@ -1,0 +1,187 @@
+name: RETRO BOOMER Release Candidate
+run-name: RETRO BOOMER candidate from ${{ github.sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      pack_asset_id:
+        description: Immutable asset ID of the owner-approved Retro Boomer proof archive in this repository
+        required: true
+        type: string
+      pack_sha256:
+        description: Reviewed archive SHA-256; must equal the committed material policy
+        required: true
+        type: string
+      ci_run_id:
+        description: Successful RETRO BOOMER Platform CI run for this exact commit
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: retro-boomer-candidate-${{ github.sha }}
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  CARGO_INCREMENTAL: "0"
+  CARGO_TERM_COLOR: always
+jobs:
+  preflight:
+    if: github.repository == 'Aquacongas/retro-boomer' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    outputs:
+      source_sha: ${{ steps.identity.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate immutable inputs and successful CI identity
+        id: identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACK_ASSET_ID: ${{ inputs.pack_asset_id }}
+          PACK_SHA256: ${{ inputs.pack_sha256 }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+        run: python3 scripts/release/workflow_gate.py candidate-inputs
+      - name: Upload the same approved input bytes for all native jobs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: retro-boomer-proof-input
+          path: .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+  native:
+    needs: preflight
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: linux-x86_64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            flags: -C target-cpu=x86-64
+          - id: linux-aarch64
+            runner: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+            flags: ""
+          - id: windows-x86_64
+            runner: windows-2025
+            target: x86_64-pc-windows-msvc
+            flags: -C target-cpu=x86-64
+          - id: macos-x86_64
+            runner: macos-15-intel
+            target: x86_64-apple-darwin
+            flags: -C target-cpu=x86-64
+          - id: macos-aarch64
+            runner: macos-15
+            target: aarch64-apple-darwin
+            flags: ""
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+    defaults:
+      run:
+        shell: bash
+    env:
+      RETRO_BOOMER_SOURCE_COMMIT: ${{ needs.preflight.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          persist-credentials: false
+      - name: Install Linux native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y appstream clang libclang-dev cmake dpkg-dev pkg-config qemu-user
+      - name: Locate macOS libclang
+        if: runner.os == 'macOS'
+        run: |
+          libclang_path="$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib"
+          test -f "$libclang_path/libclang.dylib"
+          echo "LIBCLANG_PATH=$libclang_path" >> "$GITHUB_ENV"
+      - name: Locate Windows libclang
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $clang = Join-Path $env:ProgramFiles "LLVM\bin"
+          if (-not (Test-Path (Join-Path $clang "libclang.dll"))) { throw "libclang.dll not found" }
+          "LIBCLANG_PATH=$clang" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.96.0 --profile minimal
+      - name: Cache downloaded Cargo sources only
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: retro-boomer-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock') }}
+      - name: Install pinned Windows installer compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install innosetup --version 6.7.1 --yes --no-progress
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: retro-boomer-proof-input
+          path: .release-ci/input
+      - name: Verify and unpack the approved proof archive
+        env:
+          PACK_SHA256: ${{ inputs.pack_sha256 }}
+        run: |
+          python scripts/release_material.py extract --archive .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz --sha256 "$PACK_SHA256" --output .release-ci/material
+          echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)" >> "$GITHUB_ENV"
+      - name: Build, authenticate matrices, smoke-test and package Core and GUI
+        run: |
+          set -o pipefail
+          bash scripts/build_release.sh --v1-pack "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.0" --v1-pins "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.0/pins.env" --output "$PWD/.release-ci/build" --with-gui --fetch 2>&1 | tee build.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-${{ matrix.id }}
+          path: .release-ci/build/products/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Retain diagnostics separately
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: diagnostics-${{ matrix.id }}
+          path: |
+            build.log
+            .release-ci/build/work/target/cargo-timings/
+          if-no-files-found: ignore
+          retention-days: 7
+  assemble:
+    needs: [preflight, native]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: native-*
+          path: .release-ci/native
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: retro-boomer-proof-input
+          path: .release-ci/input
+      - name: Seal the exact ten products and one proof pack without publishing
+        env:
+          SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
+        run: |
+          python3 scripts/release/release_products.py assemble --inputs .release-ci/native --pack .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz --source-commit "$SOURCE_SHA" --run-id "$GITHUB_RUN_ID" --output .release-ci/candidate
+          echo '### Review this candidate before publication' >> "$GITHUB_STEP_SUMMARY"
+          sha256sum .release-ci/candidate/candidate.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: retro-boomer-release-candidate
+          path: .release-ci/candidate/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

@@ -1,0 +1,5 @@
+# RETRO BOOMER V1 material status
+
+Native materials are present in artifacts/retro-boomer-v1-20261031 and approved in noid_node/build.rs with bank pin 841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58. All eight source SHA-256 values match the committed policy. The existing packaging and extraction/manifest procedures verified dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz (55270726 bytes; SHA-256 4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e). The eight archived payloads are byte-identical to their approved sources. No proofs or matrices were regenerated during packaging. Generation verification is owner-reported; mathematical terminal verification was not repeated during packaging. Five-platform builds, native installer qualification and signing remain unverified. Generation commit and independently authenticated generation-log attestation remain unknown.
+
+Build-time semantic authentication remains mandatory for all three matrices. The archive SHA-256 is a transport checksum, distinct from the semantic bank pin. Nothing has been uploaded. See [release procedure](../.github/RELEASING.md).

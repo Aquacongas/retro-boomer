@@ -1,0 +1,16 @@
+# Optional per-user service. Never enabled or started by the installer.
+[Unit]
+Description=Retro Boomer full node (mining disabled)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/retro-boomer/retro-boomerd --mode node
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+KillSignal=SIGINT
+UMask=0077
+
+[Install]
+WantedBy=default.target
