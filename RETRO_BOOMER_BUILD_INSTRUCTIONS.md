@@ -2,7 +2,7 @@
 
 ## Current state
 
-Native materials are present in artifacts/retro-boomer-v1-20261031 and approved in noid_node/build.rs with bank pin 841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58. All eight source SHA-256 values match the committed policy. The existing packaging and extraction/manifest procedures verified dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz (55270726 bytes; SHA-256 4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e). The eight archived payloads are byte-identical to their approved sources. No proofs or matrices were regenerated during packaging. Generation verification is owner-reported; mathematical terminal verification was not repeated during packaging. Five-platform builds, native installer qualification and signing remain unverified. Generation commit and independently authenticated generation-log attestation remain unknown.
+Native materials are present in artifacts/retro-boomer-v1-20261031 and approved in noid_node/build.rs with bank pin 841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58. All eight source SHA-256 values match the committed policy. The existing packaging and extraction/manifest procedures verified dist/materials-v1.0.1/retro-boomer-history-step-pack-v1.0.1.tar.gz (55270717 bytes; SHA-256 7574cde0dc36f25bea5bc8ee084f047caf20702a5034f169116c1baff7b962d3). The eight archived payloads are byte-identical to the approved v1.0.0 files, with the bank pin and original generation provenance preserved. No proofs or matrices were regenerated during packaging. Generation verification is owner-reported; mathematical terminal verification was not repeated during packaging. Five-platform builds, native installer qualification and signing remain unverified. Generation commit and independently authenticated generation-log attestation remain unknown.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ The distribution archive is already created and verified. Its committed archive_
 ## Local build — only after native approval
 
 ```bash
-cd /home/oms/parano1d-newchain
+cd /home/oms/retro-boomer
 CARGO_BUILD_JOBS=8 ./scripts/build_release.sh \
   --v1-pack artifacts/retro-boomer-v1-20261031 \
   --v1-pins artifacts/retro-boomer-v1-20261031/pins.env \

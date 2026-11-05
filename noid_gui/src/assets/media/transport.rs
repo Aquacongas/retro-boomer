@@ -10,7 +10,7 @@ use std::time::Duration;
 pub const MAX_RECEIPT_BYTES: usize = 1024 * 1024;
 pub const MAX_UPLOAD_BYTES: usize = 2 * (MAX_IMAGE_BYTES + MAX_RECEIPT_BYTES) + 32 * 1024;
 pub const MAX_RPC_BYTES: usize = 3 * 1024 * 1024;
-pub const DEFAULT_ORIGIN: &str = "http://127.0.0.1:19610/";
+pub const DEFAULT_ORIGIN: &str = "https://tradedata.retroboomer.org/";
 
 pub fn configured_origin() -> String {
     std::env::var("RETRO_BOOMER_GUI_MEDIA_ORIGIN").unwrap_or_else(|_| DEFAULT_ORIGIN.to_owned())

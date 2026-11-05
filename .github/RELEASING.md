@@ -1,4 +1,4 @@
-# Retro Boomer v1.0.0 release process
+# Retro Boomer v1.0.1 release process
 
 Publisher: Retro Boomer. Contact: aquacongass@proton.me.
 Repository: https://github.com/Aquacongas/retro-boomer.
@@ -14,7 +14,8 @@ build, semantic matrix authentication, terminal verification, node, miner,
 GitHub operation or public release is executed in this stage. A prepared workflow
 is not evidence that its five native jobs have passed.
 
-Native materials are present in artifacts/retro-boomer-v1-20261031 and approved in noid_node/build.rs with bank pin 841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58. All eight source SHA-256 values match the committed policy. The existing packaging and extraction/manifest procedures verified dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz (55270726 bytes; SHA-256 4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e). The eight archived payloads are byte-identical to their approved sources. No proofs or matrices were regenerated during packaging. Generation verification is owner-reported; mathematical terminal verification was not repeated during packaging. Five-platform builds, native installer qualification and signing remain unverified. Generation commit and independently authenticated generation-log attestation remain unknown.
+Native materials are present in artifacts/retro-boomer-v1-20261031 and approved in noid_node/build.rs with bank pin 841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58. All eight source SHA-256 values match the committed policy. The existing packaging and extraction/manifest procedures verified dist/materials-v1.0.1/retro-boomer-history-step-pack-v1.0.1.tar.gz (55270717 bytes; SHA-256 7574cde0dc36f25bea5bc8ee084f047caf20702a5034f169116c1baff7b962d3). The eight archived payloads are byte-identical to the approved v1.0.0 files;
+the bank pin and original generation provenance are preserved. No proofs or matrices were regenerated during packaging. Generation verification is owner-reported; mathematical terminal verification was not repeated during packaging. Five-platform builds, native installer qualification and signing remain unverified. Generation commit and independently authenticated generation-log attestation remain unknown.
 
 ## 1. Existing approved proof archive
 
@@ -47,9 +48,9 @@ The approved bank/pin and full production matrix checks remain mandatory.
 ### Native release-candidate staging (explicit --output)
 
 A future candidate build must have a real reviewed source identity and timestamp. In an
-actual Git checkout, the following read-only commands derive them. The current
-empty local `.git/` cannot supply them; do not invent a commit or initialize Git
-just to satisfy this example.
+actual Git checkout, the following read-only commands derive them. Commit all
+reviewed release changes before building an official candidate so its source
+identity includes those changes.
 
 ```bash
 RETRO_BOOMER_SOURCE_COMMIT=$(git rev-parse HEAD) || exit 1
@@ -65,7 +66,9 @@ bash scripts/build_release.sh \
 omit it only when the correct target dependencies are already cached. All Cargo
 operations retain `--locked`. The candidate mode uses explicit native targets, a fresh
 target/staging directory, portable x86-64 flags and macOS deployment target 11.0.
-It compiles only node, CLI, external miner and desktop GUI; never `retro-boomer-media`.
+It compiles node, CLI, external miner and desktop GUI on every target. Linux
+x86_64 candidate staging additionally compiles and packages `retro-boomer-media`
+in Core only.
 
 Both modes perform real matrix preflight. Candidate-only smoke checks start an owned, temporary,
 loopback-only node with mining and DNS bootstrap off, check genesis/economics and
@@ -147,30 +150,31 @@ repackage or otherwise mutate approved products in the publication job.
 
 ## 6. Explicit final draft operations — protected, no rebuild
 
-Configure the retro-boomer-release environment with required reviewers and main-only access. Both operations require a successful manual candidate, its independently reviewed candidate.json SHA-256 and a separately approved annotated v1.0.0 tag pointing to the same candidate commit. Neither operation creates a tag. Only the protected job has contents:write. Ordinary pushes, CI and candidate completion never dispatch either operation.
+Configure the retro-boomer-release environment with required reviewers and main-only access. Both operations require a successful manual candidate, its independently reviewed candidate.json SHA-256 and a separately approved annotated v1.0.1 tag pointing to the same candidate commit. Neither operation creates a tag. Only the protected job has contents:write. Ordinary pushes, CI and candidate completion never dispatch either operation.
 
 Dispatch RETRO BOOMER Approved Draft Operations on main:
 
-- create-draft: leave draft_release_id empty and confirm exactly CREATE DRAFT RETRO BOOMER v1.0.0. After approval the workflow refuses an existing release for v1.0.0, creates a draft with --draft --verify-tag, attaches all 19 candidate files, and downloads/checks their actual SHA-256 values. It reports the numeric final draft ID. It never publishes. A partially uploaded draft after a failed job remains unpublished and requires owner review; the workflow never clobbers or repairs it automatically.
-- publish-draft: supply that exact draft_release_id and confirm exactly PUBLISH DRAFT RETRO BOOMER v1.0.0. After separate approval it verifies the local candidate again, the draft ID, unpublished state, source/tag, notes, complete asset names and every downloaded asset hash. Only then does it PATCH draft=false on that exact ID. It never creates a release or rebuilds products on this path.
+- create-draft: leave draft_release_id empty and confirm exactly CREATE DRAFT RETRO BOOMER v1.0.1. After approval the workflow refuses an existing release for v1.0.1, creates a draft with --draft --verify-tag, attaches all 19 candidate files, and downloads/checks their actual SHA-256 values. It reports the numeric final draft ID. It never publishes. A partially uploaded draft after a failed job remains unpublished and requires owner review; the workflow never clobbers or repairs it automatically.
+- publish-draft: supply that exact draft_release_id and confirm exactly PUBLISH DRAFT RETRO BOOMER v1.0.1. After separate approval it verifies the local candidate again, the draft ID, unpublished state, source/tag, notes, complete asset names and every downloaded asset hash. Only then does it PATCH draft=false on that exact ID. It never creates a release or rebuilds products on this path.
 
 Both operations also require candidate_run_id and candidate_manifest_sha256. The original qualification gate remains mandatory for publishing: candidate notes must contain Release qualification: passed and must not contain preparation only. Current notes intentionally fail this gate. Draft creation can stage a preparation-only candidate for inspection, but that exact candidate cannot subsequently be published while unqualified. Editing remote notes or assets does not qualify it and causes verification failure. A new genuinely qualified candidate requires the existing candidate process and renewed approvals; no binary rebuilding is performed by draft operations.
 
-Use a distinct hosting tag, retro-boomer-materials-v1.0.0, for the input-material draft. It is independent of the final v1.0.0 product draft and is never published by this workflow. Drafts are not public release listings; repository collaborators with appropriate access can see them. No remote operation has been performed during local preparation.
+Use a distinct hosting tag, retro-boomer-materials-v1.0.1, for the input-material draft. It is independent of the final v1.0.1 product draft and is never published by this workflow. Drafts are not public release listings; repository collaborators with appropriate access can see them. No remote operation has been performed during local preparation.
 
 ## Product inventory
 
 | Target | Core | GUI |
 |---|---|---|
-| Linux x86-64 | `retro-boomer-core-v1.0.0-linux-x86_64.tar.gz` | `retro-boomer-gui-v1.0.0-linux-x86_64.deb` |
-| Linux ARM64 | `retro-boomer-core-v1.0.0-linux-aarch64.tar.gz` | `retro-boomer-gui-v1.0.0-linux-aarch64.deb` |
-| Windows x86-64 | `retro-boomer-core-v1.0.0-windows-x86_64.zip` | `retro-boomer-gui-v1.0.0-windows-x86_64-setup.exe` |
-| macOS Intel | `retro-boomer-core-v1.0.0-macos-x86_64.tar.gz` | `retro-boomer-gui-v1.0.0-macos-x86_64.dmg` |
-| macOS ARM64 | `retro-boomer-core-v1.0.0-macos-aarch64.tar.gz` | `retro-boomer-gui-v1.0.0-macos-aarch64.dmg` |
+| Linux x86-64 | `retro-boomer-core-v1.0.1-linux-x86_64.tar.gz` | `retro-boomer-gui-v1.0.1-linux-x86_64.deb` |
+| Linux ARM64 | `retro-boomer-core-v1.0.1-linux-aarch64.tar.gz` | `retro-boomer-gui-v1.0.1-linux-aarch64.deb` |
+| Windows x86-64 | `retro-boomer-core-v1.0.1-windows-x86_64.zip` | `retro-boomer-gui-v1.0.1-windows-x86_64-setup.exe` |
+| macOS Intel | `retro-boomer-core-v1.0.1-macos-x86_64.tar.gz` | `retro-boomer-gui-v1.0.1-macos-x86_64.dmg` |
+| macOS ARM64 | `retro-boomer-core-v1.0.1-macos-aarch64.tar.gz` | `retro-boomer-gui-v1.0.1-macos-aarch64.dmg` |
 
 Additional attached assets: the HistoryStep pack, SHA256SUMS, candidate.json, RELEASE_NOTES.md and five BUILD records (19 files total).
 Hosting-generated source archives are separate. Core includes `retro-boomerd`, `retro-boomer-cli`,
-`retro-boomer-miner`, licenses, guide and build identity. GUI includes `retro-boomer-gui`, `retro-boomerd`,
+`retro-boomer-miner`, licenses, guide and build identity. Linux x86_64 Core also
+includes `retro-boomer-media`; other Core and all GUI packages exclude it. GUI includes `retro-boomer-gui`, `retro-boomerd`,
 `retro-boomer-miner`, the supplied artwork, guides and the font license. macOS keeps
 `Retro Boomer.app` but its actual GUI executable is `Contents/MacOS/retro-boomer-gui`.
 
@@ -180,7 +184,8 @@ identity. Window grouping, desktop integration, bundle ID, data paths and Window
 AppId remain unchanged. The older-compatible `developer_name` metadata produces
 two informational notices on AppStream 1.1.2, not validation failures.
 
-See the [release checklist](../docs/release-checklist-v1.0.0.md). This guide does
+See the [historical v1.0.0 release checklist](../docs/release-checklist-v1.0.0.md)
+for qualification categories; use the v1.0.1 tag and asset names in this guide. This guide does
 not authorize any upload, tag, workflow dispatch or publication now.
 
 ## Native distribution identity and provisioning
@@ -189,18 +194,21 @@ The approved local distribution archive and digest are recorded above. Local ign
 
 ### Owner-run input-material upload — future authorization required
 
-These are remote WRITE operations. They were not executed during local preparation. Run only after explicit upload authorization and after the source repository has been prepared. Keep this hosting draft separate from v1.0.0. If the hosting tag already has a release, stop and inspect it; do not use --clobber or overwrite assets.
+These are remote WRITE operations. They were not executed during local preparation. Run only after explicit upload authorization and after the source repository has been prepared. Keep this hosting draft separate from v1.0.1. If the hosting tag already has a release, stop and inspect it; do not use --clobber or overwrite assets.
+
+Create and push the separate annotated hosting tag only after owner approval.
+The upload below requires that remote tag to exist and never creates it implicitly.
 
 ```bash
-cd /home/oms/parano1d-newchain
-sha256sum dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz
-gh release create retro-boomer-materials-v1.0.0 \
-  dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz \
-  --repo Aquacongas/retro-boomer --draft \
-  --title 'RETRO BOOMER approved HistoryStep input v1.0.0' \
+cd /home/oms/retro-boomer
+sha256sum dist/materials-v1.0.1/retro-boomer-history-step-pack-v1.0.1.tar.gz
+gh release create retro-boomer-materials-v1.0.1 \
+  dist/materials-v1.0.1/retro-boomer-history-step-pack-v1.0.1.tar.gz \
+  --repo Aquacongas/retro-boomer --draft --verify-tag \
+  --title 'RETRO BOOMER approved HistoryStep input v1.0.1' \
   --notes 'Input-material hosting only. Not the final software release. Keep unpublished.'
 gh api --paginate 'repos/Aquacongas/retro-boomer/releases?per_page=100' \
-  --jq '.[] | select(.tag_name == "retro-boomer-materials-v1.0.0") | {id, draft, assets: [.assets[] | {id, name, size}]}'
+  --jq '.[] | select(.tag_name == "retro-boomer-materials-v1.0.1") | {id, draft, assets: [.assets[] | {id, name, size}]}'
 ```
 
 After inspecting the listing, enter the archive asset ID (not the release ID) and independently verify the uploaded bytes. These commands download only, but are still deferred until upload authorization:
@@ -210,10 +218,10 @@ read -r -p 'Approved archive asset ID: ' PACK_ASSET_ID
 [[ $PACK_ASSET_ID =~ ^[1-9][0-9]*$ ]] || exit 1
 VERIFY_DIR=$(mktemp -d)
 gh api "repos/Aquacongas/retro-boomer/releases/assets/$PACK_ASSET_ID" \
-  -H 'Accept: application/octet-stream' > "$VERIFY_DIR/retro-boomer-history-step-pack-v1.0.0.tar.gz"
+  -H 'Accept: application/octet-stream' > "$VERIFY_DIR/retro-boomer-history-step-pack-v1.0.1.tar.gz"
 printf '%s  %s\n' \
-  '4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e' \
-  "$VERIFY_DIR/retro-boomer-history-step-pack-v1.0.0.tar.gz" | sha256sum --check
+  '7574cde0dc36f25bea5bc8ee084f047caf20702a5034f169116c1baff7b962d3' \
+  "$VERIFY_DIR/retro-boomer-history-step-pack-v1.0.1.tar.gz" | sha256sum --check
 ```
 
 The first digest must match the committed archive_sha256. Record the numeric archive asset ID, not the release ID. Independently download that asset and compare its SHA-256 before dispatch. Supply that asset ID, the committed archive SHA-256 and a successful same-commit Platform CI run ID to Release Candidate. Source-only CI needs no bank upload. Verify that the workflow token can read the hosting draft; this has not been tested remotely. Default Actions input retention is 7 days and candidate retention is 14 days. Preserve approved candidates locally if long review is expected; expired Actions candidates cannot be published by this workflow.

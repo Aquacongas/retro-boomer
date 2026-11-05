@@ -22,7 +22,7 @@ on:
         required: true
         type: string
       confirmation:
-        description: Type CREATE DRAFT RETRO BOOMER v1.0.0 or PUBLISH DRAFT RETRO BOOMER v1.0.0
+        description: Type CREATE DRAFT RETRO BOOMER v1.0.1 or PUBLISH DRAFT RETRO BOOMER v1.0.1
         required: true
         type: string
 permissions:
@@ -35,7 +35,7 @@ env:
   DRAFT_RELEASE_ID: ${{ inputs.draft_release_id }}
   CONFIRMATION: ${{ inputs.confirmation }}
 concurrency:
-  group: retro-boomer-publication-v1.0.0
+  group: retro-boomer-publication-v1.0.1
   cancel-in-progress: false
 jobs:
   verify:

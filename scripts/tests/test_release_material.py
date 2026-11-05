@@ -65,11 +65,11 @@ class ReleaseMaterialTests(unittest.TestCase):
             except OSError: self.skipTest('symlink creation unavailable')
             with self.assertRaises(ValueError): material.regular_file(root/'link')
 
-    @unittest.skipUnless(material.policy().get('archive_sha256') and (ROOT/'dist/materials/retro-boomer-history-step-pack-v1.0.0.tar.gz').is_file(), 'no approved native archive is available')
+    @unittest.skipUnless(material.policy().get('archive_sha256') and (ROOT/'dist'/f"materials-v{material.policy()['version']}"/material.policy()['archive_name']).is_file(), 'no approved native archive is available')
     def test_existing_archive_extracts_and_detects_manifest_tampering(self):
         with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
             root=Path(directory)
-            p=material.policy(); archive=ROOT/'dist/materials'/p['archive_name']
+            p=material.policy(); archive=ROOT/'dist'/f"materials-v{p['version']}"/p['archive_name']
             self.assertEqual(material.digest(archive),p['archive_sha256'])
             material.extract(argparse.Namespace(archive=archive,sha256=p['archive_sha256'],output=root/'unpack'))
             unpacked=root/'unpack'/p['extraction_root']

@@ -76,6 +76,10 @@ if [[ -z $OUTPUT ]]; then
   printf 'Local release binaries: %s\nNo installers, runtime smoke tests or publication were requested.\n' "$BIN_DIR"
   exit 0
 fi
+if [[ $RELEASE_PLATFORM == linux-x86_64 ]]; then
+  cargo build "${CARGO_RELEASE_ARGS[@]}" -p noid_gui --bin retro-boomer-media
+  "$BIN_DIR/retro-boomer-media" --help >/dev/null
+fi
 EXE=
 [[ $RELEASE_PLATFORM != windows-* ]] || EXE=.exe
 if [[ $RELEASE_PLATFORM == windows-* && -n ${RETRO_BOOMER_WINDOWS_SIGN_THUMBPRINT:-} ]]; then

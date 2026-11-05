@@ -1,9 +1,9 @@
 {
-  "archive_name": "retro-boomer-history-step-pack-v1.0.0.tar.gz",
-  "archive_root": "retro-boomer-history-step-pack-v1.0.0",
-  "archive_sha256": "4569800c082e967bbaa3c4eb6b04261ed4b787aad92435963faab788e4aeba9e",
+  "archive_name": "retro-boomer-history-step-pack-v1.0.1.tar.gz",
+  "archive_root": "retro-boomer-history-step-pack-v1.0.1",
+  "archive_sha256": "7574cde0dc36f25bea5bc8ee084f047caf20702a5034f169116c1baff7b962d3",
   "bank": "841c496f9b1b24db586fb3a976e2c201c335634b84a91193bbe4e4f5d7537f58",
-  "extraction_root": "retro-boomer-history-step-pack-v1.0.0",
+  "extraction_root": "retro-boomer-history-step-pack-v1.0.1",
   "files": {
     "pins.env": "c148463d990a13d6c60aa5010db8521d90db963f1cf584745730d5a4430cfbfd",
     "v21-large.field-r1cs.zst": "279f9a1b2f369cf2c3b6f3b85d3c72938800f8c6a0ad6eaa27440a8c87687380",
@@ -25,5 +25,5 @@
     "status": "Native RETRO BOOMER materials were generated and verified locally according to the owner and approved in source. Packaging independently checks the eight approved file hashes and framing. Generation source commit and independently authenticated generation-log attestation are unavailable; five-platform qualification is pending."
   },
   "schema": 1,
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

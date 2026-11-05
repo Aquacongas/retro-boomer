@@ -107,6 +107,10 @@ def document_sources(platform):
 def record(args):
     p = material.policy()
     files = binaries(args.bin_dir, args.platform)
+    if args.platform == 'linux-x86_64':
+        media = args.bin_dir / 'retro-boomer-media'
+        architecture(media, args.platform)
+        files.append(media)
     commit = os.environ.get('RETRO_BOOMER_SOURCE_COMMIT') or None
     require(commit is None or re.fullmatch('[0-9a-f]{40}', commit), 'invalid source commit')
     data = {'schema': 1, 'project': 'Retro Boomer', 'version': p['version'], 'platform': args.platform,
@@ -123,6 +127,10 @@ def record(args):
 def core(args):
     p = material.policy()
     files = binaries(args.bin_dir, args.platform)[:3]
+    if args.platform == 'linux-x86_64':
+        media = args.bin_dir / 'retro-boomer-media'
+        architecture(media, args.platform)
+        files.append(media)
     root = Path(__file__).resolve().parents[2]
     sources = {f.name: f for f in files}
     sources.update(document_sources(args.platform))
@@ -145,7 +153,7 @@ def core(args):
                 for name, path in sorted(sources.items()):
                     data = path.read_bytes()
                     info = tarfile.TarInfo(stem + '/' + name)
-                    info.mode = 0o755 if name in ('retro-boomerd', 'retro-boomer-cli', 'retro-boomer-miner') else 0o644
+                    info.mode = 0o755 if name in ('retro-boomerd', 'retro-boomer-cli', 'retro-boomer-miner', 'retro-boomer-media') else 0o644
                     info.size = len(data)
                     archive.addfile(info, io.BytesIO(data))
     verify_core(destination, args.platform, json.loads(args.record.read_text()))
@@ -156,6 +164,8 @@ def verify_core(path, platform, record):
     p = material.policy()
     suffix = '.exe' if platform.startswith('windows-') else ''
     binary_names = {n + suffix for n in ('retro-boomerd', 'retro-boomer-cli', 'retro-boomer-miner')}
+    if platform == 'linux-x86_64':
+        binary_names.add('retro-boomer-media')
     expected = binary_names | set(document_sources(platform)) | {'BUILD.json'}
     stem = names(platform, p['version'])[0].removesuffix('.tar.gz').removesuffix('.zip')
     hashes = {name: record['binaries'][name] for name in binary_names}
@@ -206,7 +216,7 @@ def assemble(args):
         regular_file(f)
         shutil.copyfile(f, args.output / f.name)
     shutil.copyfile(args.pack, args.output / p['archive_name'])
-    shutil.copyfile(Path(__file__).resolve().parents[2] / '.github/release-notes/v1.0.0.md', args.output / 'RELEASE_NOTES.md')
+    shutil.copyfile(Path(__file__).resolve().parents[2] / '.github/release-notes' / f'v{p["version"]}.md', args.output / 'RELEASE_NOTES.md')
     (args.output / 'SHA256SUMS').write_text(checksums(args.output, expected_assets(p)), encoding='ascii')
     data = {'schema': 1, 'project': 'Retro Boomer', 'repository': REPOSITORY, 'version': p['version'],
             'source_commit': args.source_commit, 'candidate_run_id': args.run_id,
@@ -238,6 +248,8 @@ def verify_candidate(directory):
         require(record['source_commit'] == data['source_commit'] and record['bank'] == p['bank'] and record['proof_archive_sha256'] == p['archive_sha256'], 'mixed source or bank')
         require(set(record['documents']) == set(document_sources(platform)) and all(re.fullmatch('[0-9a-f]{64}', h) for h in record['documents'].values()), 'wrong document record set')
         expected_binaries = {n + ('.exe' if platform.startswith('windows-') else '') for n in ('retro-boomerd','retro-boomer-cli','retro-boomer-miner','retro-boomer-gui')}
+        if platform == 'linux-x86_64':
+            expected_binaries.add('retro-boomer-media')
         require(set(record['binaries']) == expected_binaries and all(re.fullmatch('[0-9a-f]{64}', h) for h in record['binaries'].values()), 'wrong binary record set')
         matrix = record['matrix_authentication']
         require(matrix.get('schema') == 1 and matrix['bank'] == p['bank'] and matrix['metadata_sha256'] == p['files']['v21-runtime-metadata.bin'], 'matrix report bank mismatch')

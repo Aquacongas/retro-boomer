@@ -14,7 +14,8 @@ Source parameters are not a substitute for release qualification.
 Core archives contain retro-boomerd, retro-boomer-cli and retro-boomer-miner (with .exe on Windows),
 LICENSE, NOTICE, this guide and BUILD.json. GUI packages contain retro-boomer-gui,
 retro-boomerd, retro-boomer-miner, application icons, guides and the embedded-font license.
-retro-boomer-media is not a desktop release component. On macOS the application bundle
+The Linux x86_64 Core archive also contains retro-boomer-media. Other Core archives
+and all GUI packages exclude it. On macOS the application bundle
 is Retro Boomer.app; its executable is Contents/MacOS/retro-boomer-gui.
 
 Start the GUI through its installed application shortcut. It supervises its

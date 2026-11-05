@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: retro-boomer-proof-input
-          path: .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz
+          path: .release-ci/input/retro-boomer-history-step-pack-v1.0.1.tar.gz
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
@@ -131,12 +131,12 @@ jobs:
         env:
           PACK_SHA256: ${{ inputs.pack_sha256 }}
         run: |
-          python scripts/release_material.py extract --archive .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz --sha256 "$PACK_SHA256" --output .release-ci/material
+          python scripts/release_material.py extract --archive .release-ci/input/retro-boomer-history-step-pack-v1.0.1.tar.gz --sha256 "$PACK_SHA256" --output .release-ci/material
           echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)" >> "$GITHUB_ENV"
       - name: Build, authenticate matrices, smoke-test and package Core and GUI
         run: |
           set -o pipefail
-          bash scripts/build_release.sh --v1-pack "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.0" --v1-pins "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.0/pins.env" --output "$PWD/.release-ci/build" --with-gui --fetch 2>&1 | tee build.log
+          bash scripts/build_release.sh --v1-pack "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.1" --v1-pins "$PWD/.release-ci/material/retro-boomer-history-step-pack-v1.0.1/pins.env" --output "$PWD/.release-ci/build" --with-gui --fetch 2>&1 | tee build.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: native-${{ matrix.id }}
@@ -175,7 +175,7 @@ jobs:
         env:
           SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
         run: |
-          python3 scripts/release/release_products.py assemble --inputs .release-ci/native --pack .release-ci/input/retro-boomer-history-step-pack-v1.0.0.tar.gz --source-commit "$SOURCE_SHA" --run-id "$GITHUB_RUN_ID" --output .release-ci/candidate
+          python3 scripts/release/release_products.py assemble --inputs .release-ci/native --pack .release-ci/input/retro-boomer-history-step-pack-v1.0.1.tar.gz --source-commit "$SOURCE_SHA" --run-id "$GITHUB_RUN_ID" --output .release-ci/candidate
           echo '### Review this candidate before publication' >> "$GITHUB_STEP_SUMMARY"
           sha256sum .release-ci/candidate/candidate.json >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
